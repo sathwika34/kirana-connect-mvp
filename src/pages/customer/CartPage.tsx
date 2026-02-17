@@ -1,24 +1,23 @@
 /**
  * Cart Page — Customer
- * Shows cart items with quantity controls, total price, and Place Order button.
- * On Place Order: creates order in localStorage, notifies owner, clears cart.
+ * Shows cart items with quantity controls, delivery charge, total price.
+ * Proceed to Payment page for checkout.
  */
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { getCart, saveCart, clearCart, addOrder, addOwnerNotification, getCustomerProfile, generateId, getOwnerProfile } from '@/lib/store';
+import { getCart, saveCart } from '@/lib/store';
 import { Plus, Minus, Trash2, ShoppingBag, ArrowRight } from 'lucide-react';
+
+const DELIVERY_CHARGE = 25;
 
 const CartPage = () => {
   const navigate = useNavigate();
   const [cart, setCart] = useState(getCart());
-  const customer = getCustomerProfile();
-  const owner = getOwnerProfile();
 
   const updateQty = (productId: string, delta: number) => {
     const updated = cart.map(c => {
       if (c.product.id === productId) {
-        const newQty = Math.max(1, c.quantity + delta);
-        return { ...c, quantity: newQty };
+        return { ...c, quantity: Math.max(1, c.quantity + delta) };
       }
       return c;
     });
@@ -32,26 +31,8 @@ const CartPage = () => {
     saveCart(updated);
   };
 
-  const total = cart.reduce((s, c) => s + c.product.price * c.quantity, 0);
-
-  const placeOrder = () => {
-    if (cart.length === 0) return;
-    const orderId = generateId();
-    addOrder({
-      id: orderId,
-      customerId: customer?.id || 'guest',
-      customerName: customer?.name || 'Guest Customer',
-      shopOwnerId: owner?.id || 'owner1',
-      items: cart,
-      totalPrice: total,
-      status: 'New',
-      createdAt: new Date().toISOString(),
-    });
-    // Notify owner about new order
-    addOwnerNotification(`New order #${orderId} from ${customer?.name || 'Guest'} — ₹${total}`, orderId);
-    clearCart();
-    navigate(`/customer/order/${orderId}`);
-  };
+  const subtotal = cart.reduce((s, c) => s + c.product.price * c.quantity, 0);
+  const total = subtotal + (cart.length > 0 ? DELIVERY_CHARGE : 0);
 
   return (
     <div className="animate-fade-in">
@@ -98,15 +79,21 @@ const CartPage = () => {
             ))}
           </div>
 
-          {/* Total & Place Order */}
+          {/* Price breakdown */}
           <div className="kc-card-flat p-4">
-            <div className="flex justify-between items-center mb-3">
+            <div className="flex justify-between text-sm text-foreground mb-1">
+              <span>Subtotal</span><span>₹{subtotal}</span>
+            </div>
+            <div className="flex justify-between text-sm text-muted-foreground mb-2">
+              <span>Delivery Charge</span><span>₹{DELIVERY_CHARGE}</span>
+            </div>
+            <div className="flex justify-between items-center border-t border-border pt-2">
               <span className="font-heading font-bold text-foreground">Total</span>
               <span className="text-xl font-heading font-bold text-foreground">₹{total}</span>
             </div>
-            <button onClick={placeOrder}
-              className="w-full bg-primary text-primary-foreground py-3 rounded-lg font-semibold hover:opacity-90 transition-opacity flex items-center justify-center gap-2">
-              Place Order <ArrowRight className="w-4 h-4" />
+            <button onClick={() => navigate('/customer/payment')}
+              className="w-full mt-3 bg-primary text-primary-foreground py-3 rounded-lg font-semibold hover:opacity-90 transition-opacity flex items-center justify-center gap-2">
+              Proceed to Checkout <ArrowRight className="w-4 h-4" />
             </button>
           </div>
         </>
