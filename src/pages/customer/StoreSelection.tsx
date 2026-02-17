@@ -56,6 +56,7 @@ const StoreSelection = () => {
                   <span className="flex items-center gap-1"><MapPin className="w-3 h-3" /> {s!.address.area}</span>
                   <span className="flex items-center gap-1"><Star className="w-3 h-3 text-warning" /> {s!.rating}</span>
                   <span className="flex items-center gap-1"><Clock className="w-3 h-3" /> {s!.openingTime} - {s!.closingTime}</span>
+                  <span className="text-xs">~1.2 km</span>
                 </div>
               </button>
             );

@@ -24,7 +24,7 @@ const CustomerLogin = () => {
     if (otp.length < 4) return;
     saveCustomerProfile({ id: generateId(), mobile, name });
     setStep('verified');
-    setTimeout(() => navigate('/customer/stores'), 1000);
+    setTimeout(() => navigate('/customer/address'), 1000);
   };
 
   return (

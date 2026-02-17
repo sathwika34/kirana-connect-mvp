@@ -87,6 +87,36 @@ export interface CustomerProfile {
   id: string;
   mobile: string;
   name: string;
+  email?: string;
+}
+
+export interface CustomerAddress {
+  id: string;
+  customerId: string;
+  houseNumber: string;
+  street: string;
+  landmark: string;
+  pinCode: string;
+  gpsLocation: string;
+  label: 'Home' | 'Office' | 'Other';
+}
+
+export interface Rating {
+  id: string;
+  orderId: string;
+  customerId: string;
+  storeRating: number;
+  deliveryRating: number;
+  feedback: string;
+  createdAt: string;
+}
+
+export interface SavedList {
+  id: string;
+  customerId: string;
+  name: string;
+  productIds: string[];
+  createdAt: string;
 }
 
 // ============ HELPERS ============
@@ -186,6 +216,40 @@ export const markCustomerNotifsRead = () => {
 
 export const getCustomerProfile = (): CustomerProfile | null => get('kc_customer', null);
 export const saveCustomerProfile = (c: CustomerProfile) => set('kc_customer', c);
+
+// ============ CUSTOMER ADDRESSES ============
+
+export const getCustomerAddresses = (): CustomerAddress[] => get('kc_addresses', []);
+export const saveCustomerAddresses = (a: CustomerAddress[]) => set('kc_addresses', a);
+export const addCustomerAddress = (a: CustomerAddress) => {
+  const addrs = getCustomerAddresses();
+  addrs.push(a);
+  saveCustomerAddresses(addrs);
+};
+
+// ============ RATINGS ============
+
+export const getRatings = (): Rating[] => get('kc_ratings', []);
+export const saveRating = (r: Rating) => {
+  const ratings = getRatings();
+  ratings.push(r);
+  set('kc_ratings', ratings);
+};
+export const getRatingForOrder = (orderId: string): Rating | undefined =>
+  getRatings().find(r => r.orderId === orderId);
+
+// ============ SAVED LISTS ============
+
+export const getSavedLists = (): SavedList[] => get('kc_saved_lists', []);
+export const saveSavedLists = (l: SavedList[]) => set('kc_saved_lists', l);
+export const addSavedList = (l: SavedList) => {
+  const lists = getSavedLists();
+  lists.push(l);
+  saveSavedLists(lists);
+};
+export const deleteSavedList = (id: string) => {
+  saveSavedLists(getSavedLists().filter(l => l.id !== id));
+};
 
 // ============ SEED DATA ============
 
