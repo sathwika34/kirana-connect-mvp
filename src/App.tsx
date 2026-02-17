@@ -13,15 +13,10 @@ import OwnerProducts from "./pages/owner/OwnerProducts";
 import OwnerOrders from "./pages/owner/OwnerOrders";
 import OwnerProfile from "./pages/owner/OwnerProfile";
 import CustomerLogin from "./pages/customer/CustomerLogin";
-import CustomerAddress from "./pages/customer/CustomerAddress";
 import StoreSelection from "./pages/customer/StoreSelection";
 import CustomerProducts from "./pages/customer/CustomerProducts";
 import CartPage from "./pages/customer/CartPage";
-import PaymentPage from "./pages/customer/PaymentPage";
 import OrderTracking from "./pages/customer/OrderTracking";
-import CustomerOrders from "./pages/customer/CustomerOrders";
-import CustomerProfile from "./pages/customer/CustomerProfile";
-import SavedLists from "./pages/customer/SavedLists";
 import NotFound from "./pages/NotFound";
 
 // Layouts
@@ -56,15 +51,10 @@ const App = () => (
           {/* Customer Flow */}
           <Route path="/customer/login" element={<CustomerLogin />} />
           <Route path="/customer" element={<CustomerLayout />}>
-            <Route path="address" element={<CustomerAddress />} />
             <Route path="stores" element={<StoreSelection />} />
             <Route path="products" element={<CustomerProducts />} />
             <Route path="cart" element={<CartPage />} />
-            <Route path="payment" element={<PaymentPage />} />
             <Route path="order/:orderId" element={<OrderTracking />} />
-            <Route path="orders" element={<CustomerOrders />} />
-            <Route path="profile" element={<CustomerProfile />} />
-            <Route path="saved-lists" element={<SavedLists />} />
           </Route>
 
           <Route path="*" element={<NotFound />} />

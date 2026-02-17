@@ -1,13 +1,12 @@
 /**
  * Order Tracking Page — Customer
  * Shows order status with a progress bar.
- * When delivered: confirm receipt, rate store & delivery, leave feedback.
  * Polls localStorage for status updates (simulates live updates).
  */
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { getOrders, getRatingForOrder, saveRating, generateId, getCustomerProfile, getShop } from '@/lib/store';
-import { Package, CheckCircle2, Truck, ChefHat, ClipboardCheck, Star, Receipt } from 'lucide-react';
+import { getOrders } from '@/lib/store';
+import { Package, CheckCircle2, Truck, ChefHat, ClipboardCheck } from 'lucide-react';
 
 const steps = [
   { status: 'New', label: 'Order Placed', icon: ClipboardCheck },
@@ -20,16 +19,7 @@ const steps = [
 const OrderTracking = () => {
   const { orderId } = useParams();
   const navigate = useNavigate();
-  const customer = getCustomerProfile();
-  const shop = getShop();
   const [order, setOrder] = useState(getOrders().find(o => o.id === orderId));
-  const [confirmed, setConfirmed] = useState(false);
-  const [showRating, setShowRating] = useState(false);
-  const existingRating = orderId ? getRatingForOrder(orderId) : undefined;
-  const [storeRating, setStoreRating] = useState(existingRating?.storeRating || 0);
-  const [deliveryRating, setDeliveryRating] = useState(existingRating?.deliveryRating || 0);
-  const [feedback, setFeedback] = useState(existingRating?.feedback || '');
-  const [ratingSubmitted, setRatingSubmitted] = useState(!!existingRating);
 
   // Poll for status updates every 2 seconds
   useEffect(() => {
@@ -53,35 +43,6 @@ const OrderTracking = () => {
   }
 
   const currentIdx = steps.findIndex(s => s.status === order.status);
-  const isDelivered = order.status === 'Delivered';
-
-  const handleConfirm = () => setConfirmed(true);
-
-  const submitRating = () => {
-    if (storeRating === 0) return;
-    saveRating({
-      id: generateId(),
-      orderId: order.id,
-      customerId: customer?.id || 'guest',
-      storeRating,
-      deliveryRating,
-      feedback,
-      createdAt: new Date().toISOString(),
-    });
-    setRatingSubmitted(true);
-    setShowRating(false);
-  };
-
-  /** Star rating component */
-  const Stars = ({ value, onChange }: { value: number; onChange: (v: number) => void }) => (
-    <div className="flex gap-1">
-      {[1, 2, 3, 4, 5].map(i => (
-        <button key={i} onClick={() => onChange(i)} className="p-0.5">
-          <Star className={`w-6 h-6 transition-colors ${i <= value ? 'text-warning fill-warning' : 'text-muted-foreground'}`} />
-        </button>
-      ))}
-    </div>
-  );
 
   return (
     <div className="animate-fade-in max-w-lg mx-auto">
@@ -90,9 +51,7 @@ const OrderTracking = () => {
           <CheckCircle2 className="w-7 h-7 text-primary" />
         </div>
         <h2 className="text-xl font-heading font-bold text-foreground">Order #{order.id}</h2>
-        <p className="text-sm text-muted-foreground">
-          {shop?.shopName} · {new Date(order.createdAt).toLocaleString()}
-        </p>
+        <p className="text-sm text-muted-foreground">Placed {new Date(order.createdAt).toLocaleString()}</p>
       </div>
 
       {/* Progress Bar */}
@@ -127,101 +86,23 @@ const OrderTracking = () => {
         </div>
       </div>
 
-      {/* Delivery Confirmation */}
-      {isDelivered && !confirmed && !ratingSubmitted && (
-        <div className="kc-card-flat p-4 mb-4 text-center">
-          <CheckCircle2 className="w-10 h-10 text-primary mx-auto mb-2" />
-          <p className="font-heading font-bold text-foreground mb-1">Order Delivered!</p>
-          <p className="text-sm text-muted-foreground mb-3">Did you receive your order?</p>
-          <button onClick={handleConfirm}
-            className="w-full bg-primary text-primary-foreground py-2.5 rounded-lg font-semibold hover:opacity-90 transition-opacity">
-            Confirm Received
-          </button>
+      {/* Order Items */}
+      <div className="kc-card-flat p-4">
+        <h3 className="font-heading font-bold text-foreground text-sm mb-2">Order Items</h3>
+        {order.items.map((item, i) => (
+          <div key={i} className="flex justify-between text-sm py-1 text-foreground">
+            <span>{item.product.name} × {item.quantity}</span>
+            <span>₹{item.product.price * item.quantity}</span>
+          </div>
+        ))}
+        <div className="flex justify-between font-bold border-t border-border mt-2 pt-2 text-foreground">
+          <span>Total</span>
+          <span>₹{order.totalPrice}</span>
         </div>
-      )}
-
-      {/* Rating & Feedback */}
-      {isDelivered && confirmed && !ratingSubmitted && !showRating && (
-        <button onClick={() => setShowRating(true)}
-          className="w-full kc-card-flat p-4 mb-4 text-center hover:shadow-md transition-shadow">
-          <Star className="w-8 h-8 text-warning mx-auto mb-1" />
-          <p className="font-heading font-bold text-foreground text-sm">Rate your experience</p>
-        </button>
-      )}
-
-      {showRating && (
-        <div className="kc-card-flat p-4 mb-4 space-y-4">
-          <div>
-            <p className="text-sm font-medium text-foreground mb-1">Rate Store</p>
-            <Stars value={storeRating} onChange={setStoreRating} />
-          </div>
-          <div>
-            <p className="text-sm font-medium text-foreground mb-1">Rate Delivery</p>
-            <Stars value={deliveryRating} onChange={setDeliveryRating} />
-          </div>
-          <div>
-            <p className="text-sm font-medium text-foreground mb-1">Feedback (optional)</p>
-            <textarea value={feedback} onChange={e => setFeedback(e.target.value)}
-              className="w-full px-3 py-2.5 rounded-lg border bg-background text-foreground text-sm focus:outline-none focus:ring-2 focus:ring-ring resize-none"
-              rows={2} placeholder="Tell us about your experience..." />
-          </div>
-          <button onClick={submitRating}
-            className="w-full bg-primary text-primary-foreground py-2.5 rounded-lg font-semibold hover:opacity-90 transition-opacity">
-            Submit Rating
-          </button>
-        </div>
-      )}
-
-      {ratingSubmitted && isDelivered && (
-        <div className="kc-card-flat p-4 mb-4 text-center">
-          <p className="text-sm text-primary font-semibold">✓ Thanks for your feedback!</p>
-        </div>
-      )}
-
-      {/* Digital Receipt */}
-      {isDelivered && (
-        <div className="kc-card-flat p-4 mb-4">
-          <h3 className="font-heading font-bold text-foreground text-sm mb-2 flex items-center gap-2">
-            <Receipt className="w-4 h-4 text-primary" /> Digital Receipt
-          </h3>
-          <div className="text-xs text-muted-foreground space-y-0.5 mb-2">
-            <p>Order #{order.id}</p>
-            <p>{new Date(order.createdAt).toLocaleString()}</p>
-            {shop && <p>{shop.shopName}</p>}
-          </div>
-          {order.items.map((item, i) => (
-            <div key={i} className="flex justify-between text-sm py-0.5 text-foreground">
-              <span>{item.product.name} × {item.quantity}</span>
-              <span>₹{item.product.price * item.quantity}</span>
-            </div>
-          ))}
-          <div className="flex justify-between text-sm py-0.5 text-muted-foreground border-t border-border mt-1 pt-1">
-            <span>Delivery</span><span>₹25</span>
-          </div>
-          <div className="flex justify-between font-bold border-t border-border mt-1 pt-2 text-foreground">
-            <span>Total Paid</span><span>₹{order.totalPrice}</span>
-          </div>
-        </div>
-      )}
-
-      {/* Order Items (non-delivered) */}
-      {!isDelivered && (
-        <div className="kc-card-flat p-4 mb-4">
-          <h3 className="font-heading font-bold text-foreground text-sm mb-2">Order Items</h3>
-          {order.items.map((item, i) => (
-            <div key={i} className="flex justify-between text-sm py-1 text-foreground">
-              <span>{item.product.name} × {item.quantity}</span>
-              <span>₹{item.product.price * item.quantity}</span>
-            </div>
-          ))}
-          <div className="flex justify-between font-bold border-t border-border mt-2 pt-2 text-foreground">
-            <span>Total</span><span>₹{order.totalPrice}</span>
-          </div>
-        </div>
-      )}
+      </div>
 
       <button onClick={() => navigate('/customer/stores')}
-        className="w-full py-3 bg-accent text-accent-foreground rounded-lg font-semibold hover:opacity-90 transition-opacity text-sm">
+        className="w-full mt-4 py-3 bg-accent text-accent-foreground rounded-lg font-semibold hover:opacity-90 transition-opacity text-sm">
         Continue Shopping
       </button>
     </div>
