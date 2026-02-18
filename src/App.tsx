@@ -25,9 +25,18 @@ import CustomerProfile from "./pages/customer/CustomerProfile";
 import SavedLists from "./pages/customer/SavedLists";
 import NotFound from "./pages/NotFound";
 
+// Admin Pages
+import AdminLogin from "./pages/admin/AdminLogin";
+import AdminDashboard from "./pages/admin/AdminDashboard";
+import AdminStores from "./pages/admin/AdminStores";
+import AdminUsers from "./pages/admin/AdminUsers";
+import AdminOrders from "./pages/admin/AdminOrders";
+import AdminReports from "./pages/admin/AdminReports";
+
 // Layouts
 import OwnerLayout from "./components/OwnerLayout";
 import CustomerLayout from "./components/CustomerLayout";
+import AdminLayout from "./layouts/AdminLayout";
 
 // Initialize seed data
 import "./lib/store";
@@ -67,6 +76,16 @@ const App = () => (
             <Route path="orders" element={<CustomerOrders />} />
             <Route path="profile" element={<CustomerProfile />} />
             <Route path="saved-lists" element={<SavedLists />} />
+          </Route>
+
+          {/* Admin Flow */}
+          <Route path="/admin/login" element={<AdminLogin />} />
+          <Route path="/admin" element={<AdminLayout />}>
+            <Route path="dashboard" element={<AdminDashboard />} />
+            <Route path="stores" element={<AdminStores />} />
+            <Route path="users" element={<AdminUsers />} />
+            <Route path="orders" element={<AdminOrders />} />
+            <Route path="reports" element={<AdminReports />} />
           </Route>
 
           <Route path="*" element={<NotFound />} />
