@@ -66,7 +66,6 @@ const ShopSetup = () => {
       openingTime: form.openingTime,
       closingTime: form.closingTime,
       weeklyOff: form.weeklyOff,
-      rating: 4.0,
     });
 
     navigate('/owner/dashboard');

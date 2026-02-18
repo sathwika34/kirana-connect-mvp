@@ -1,24 +1,28 @@
 /**
  * Store Selection Page — Customer
- * Shows available stores with shop info and open/closed indicator.
+ * Shows available stores with shop info, AM/PM timings, and open/closed indicator.
+ * No ratings.
  */
 import { useNavigate } from 'react-router-dom';
 import { getShop } from '@/lib/store';
-import { MapPin, Star, Clock } from 'lucide-react';
+import { MapPin, Clock } from 'lucide-react';
+
+const formatTime = (t: string) => {
+  const [h, m] = t.split(':').map(Number);
+  const ampm = h >= 12 ? 'PM' : 'AM';
+  const hour = h % 12 || 12;
+  return `${hour}:${String(m).padStart(2, '0')} ${ampm}`;
+};
 
 const StoreSelection = () => {
   const navigate = useNavigate();
   const shop = getShop();
-
-  // For MVP, we show the single demo store
   const stores = shop ? [shop] : [];
 
   const isOpen = (s: typeof shop) => {
     if (!s) return false;
     const now = new Date();
-    const h = now.getHours();
-    const m = now.getMinutes();
-    const current = h * 60 + m;
+    const current = now.getHours() * 60 + now.getMinutes();
     const [oh, om] = s.openingTime.split(':').map(Number);
     const [ch, cm] = s.closingTime.split(':').map(Number);
     return current >= oh * 60 + om && current <= ch * 60 + cm;
@@ -38,11 +42,8 @@ const StoreSelection = () => {
           {stores.map((s, i) => {
             const open = isOpen(s);
             return (
-              <button
-                key={i}
-                onClick={() => navigate('/customer/products')}
-                className="kc-card p-4 text-left w-full focus:outline-none focus:ring-2 focus:ring-ring"
-              >
+              <button key={i} onClick={() => navigate('/customer/products')}
+                className="kc-card p-4 text-left w-full focus:outline-none focus:ring-2 focus:ring-ring">
                 <div className="flex items-start justify-between mb-2">
                   <div>
                     <h3 className="font-heading font-bold text-foreground">{s!.shopName}</h3>
@@ -54,8 +55,7 @@ const StoreSelection = () => {
                 </div>
                 <div className="flex items-center gap-3 text-xs text-muted-foreground">
                   <span className="flex items-center gap-1"><MapPin className="w-3 h-3" /> {s!.address.area}</span>
-                  <span className="flex items-center gap-1"><Star className="w-3 h-3 text-warning" /> {s!.rating}</span>
-                  <span className="flex items-center gap-1"><Clock className="w-3 h-3" /> {s!.openingTime} - {s!.closingTime}</span>
+                  <span className="flex items-center gap-1"><Clock className="w-3 h-3" /> {formatTime(s!.openingTime)} – {formatTime(s!.closingTime)}</span>
                   <span className="text-xs">~1.2 km</span>
                 </div>
               </button>

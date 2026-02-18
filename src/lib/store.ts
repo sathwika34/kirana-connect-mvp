@@ -47,7 +47,6 @@ export interface Shop {
   openingTime: string;
   closingTime: string;
   weeklyOff: string;
-  rating: number;
 }
 
 export interface Product {
@@ -275,7 +274,6 @@ export const seedDemoData = () => {
     openingTime: '07:00',
     closingTime: '21:00',
     weeklyOff: 'Sunday',
-    rating: 4.3,
   };
   
   const demoProducts: Product[] = [

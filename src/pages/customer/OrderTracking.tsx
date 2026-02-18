@@ -1,13 +1,13 @@
 /**
  * Order Tracking Page — Customer
  * Shows order status with a progress bar.
- * When delivered: confirm receipt, rate store & delivery, leave feedback.
- * Polls localStorage for status updates (simulates live updates).
+ * When delivered: confirm receipt and digital receipt.
+ * No rating/review system.
  */
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { getOrders, getRatingForOrder, saveRating, generateId, getCustomerProfile, getShop } from '@/lib/store';
-import { Package, CheckCircle2, Truck, ChefHat, ClipboardCheck, Star, Receipt } from 'lucide-react';
+import { getOrders, getShop } from '@/lib/store';
+import { Package, CheckCircle2, Truck, ChefHat, ClipboardCheck, Receipt } from 'lucide-react';
 
 const steps = [
   { status: 'New', label: 'Order Placed', icon: ClipboardCheck },
@@ -20,18 +20,10 @@ const steps = [
 const OrderTracking = () => {
   const { orderId } = useParams();
   const navigate = useNavigate();
-  const customer = getCustomerProfile();
   const shop = getShop();
   const [order, setOrder] = useState(getOrders().find(o => o.id === orderId));
   const [confirmed, setConfirmed] = useState(false);
-  const [showRating, setShowRating] = useState(false);
-  const existingRating = orderId ? getRatingForOrder(orderId) : undefined;
-  const [storeRating, setStoreRating] = useState(existingRating?.storeRating || 0);
-  const [deliveryRating, setDeliveryRating] = useState(existingRating?.deliveryRating || 0);
-  const [feedback, setFeedback] = useState(existingRating?.feedback || '');
-  const [ratingSubmitted, setRatingSubmitted] = useState(!!existingRating);
 
-  // Poll for status updates every 2 seconds
   useEffect(() => {
     const interval = setInterval(() => {
       const updated = getOrders().find(o => o.id === orderId);
@@ -44,9 +36,9 @@ const OrderTracking = () => {
     return (
       <div className="animate-fade-in text-center py-8">
         <p className="text-muted-foreground">Order not found.</p>
-        <button onClick={() => navigate('/customer/stores')}
+        <button onClick={() => navigate('/customer/home')}
           className="mt-3 px-4 py-2 bg-primary text-primary-foreground rounded-lg text-sm font-semibold">
-          Back to Stores
+          Back to Home
         </button>
       </div>
     );
@@ -54,34 +46,6 @@ const OrderTracking = () => {
 
   const currentIdx = steps.findIndex(s => s.status === order.status);
   const isDelivered = order.status === 'Delivered';
-
-  const handleConfirm = () => setConfirmed(true);
-
-  const submitRating = () => {
-    if (storeRating === 0) return;
-    saveRating({
-      id: generateId(),
-      orderId: order.id,
-      customerId: customer?.id || 'guest',
-      storeRating,
-      deliveryRating,
-      feedback,
-      createdAt: new Date().toISOString(),
-    });
-    setRatingSubmitted(true);
-    setShowRating(false);
-  };
-
-  /** Star rating component */
-  const Stars = ({ value, onChange }: { value: number; onChange: (v: number) => void }) => (
-    <div className="flex gap-1">
-      {[1, 2, 3, 4, 5].map(i => (
-        <button key={i} onClick={() => onChange(i)} className="p-0.5">
-          <Star className={`w-6 h-6 transition-colors ${i <= value ? 'text-warning fill-warning' : 'text-muted-foreground'}`} />
-        </button>
-      ))}
-    </div>
-  );
 
   return (
     <div className="animate-fade-in max-w-lg mx-auto">
@@ -117,9 +81,7 @@ const OrderTracking = () => {
                   <p className={`text-sm font-medium ${done ? 'text-foreground' : 'text-muted-foreground'}`}>
                     {step.label}
                   </p>
-                  {active && (
-                    <p className="text-xs text-primary animate-pulse-soft">Current Status</p>
-                  )}
+                  {active && <p className="text-xs text-primary animate-pulse-soft">Current Status</p>}
                 </div>
               </div>
             );
@@ -128,53 +90,21 @@ const OrderTracking = () => {
       </div>
 
       {/* Delivery Confirmation */}
-      {isDelivered && !confirmed && !ratingSubmitted && (
+      {isDelivered && !confirmed && (
         <div className="kc-card-flat p-4 mb-4 text-center">
           <CheckCircle2 className="w-10 h-10 text-primary mx-auto mb-2" />
           <p className="font-heading font-bold text-foreground mb-1">Order Delivered!</p>
           <p className="text-sm text-muted-foreground mb-3">Did you receive your order?</p>
-          <button onClick={handleConfirm}
+          <button onClick={() => setConfirmed(true)}
             className="w-full bg-primary text-primary-foreground py-2.5 rounded-lg font-semibold hover:opacity-90 transition-opacity">
             Confirm Received
           </button>
         </div>
       )}
 
-      {/* Rating & Feedback */}
-      {isDelivered && confirmed && !ratingSubmitted && !showRating && (
-        <button onClick={() => setShowRating(true)}
-          className="w-full kc-card-flat p-4 mb-4 text-center hover:shadow-md transition-shadow">
-          <Star className="w-8 h-8 text-warning mx-auto mb-1" />
-          <p className="font-heading font-bold text-foreground text-sm">Rate your experience</p>
-        </button>
-      )}
-
-      {showRating && (
-        <div className="kc-card-flat p-4 mb-4 space-y-4">
-          <div>
-            <p className="text-sm font-medium text-foreground mb-1">Rate Store</p>
-            <Stars value={storeRating} onChange={setStoreRating} />
-          </div>
-          <div>
-            <p className="text-sm font-medium text-foreground mb-1">Rate Delivery</p>
-            <Stars value={deliveryRating} onChange={setDeliveryRating} />
-          </div>
-          <div>
-            <p className="text-sm font-medium text-foreground mb-1">Feedback (optional)</p>
-            <textarea value={feedback} onChange={e => setFeedback(e.target.value)}
-              className="w-full px-3 py-2.5 rounded-lg border bg-background text-foreground text-sm focus:outline-none focus:ring-2 focus:ring-ring resize-none"
-              rows={2} placeholder="Tell us about your experience..." />
-          </div>
-          <button onClick={submitRating}
-            className="w-full bg-primary text-primary-foreground py-2.5 rounded-lg font-semibold hover:opacity-90 transition-opacity">
-            Submit Rating
-          </button>
-        </div>
-      )}
-
-      {ratingSubmitted && isDelivered && (
+      {confirmed && (
         <div className="kc-card-flat p-4 mb-4 text-center">
-          <p className="text-sm text-primary font-semibold">✓ Thanks for your feedback!</p>
+          <p className="text-sm text-primary font-semibold">✓ Order received confirmed!</p>
         </div>
       )}
 
@@ -220,7 +150,7 @@ const OrderTracking = () => {
         </div>
       )}
 
-      <button onClick={() => navigate('/customer/stores')}
+      <button onClick={() => navigate('/customer/home')}
         className="w-full py-3 bg-accent text-accent-foreground rounded-lg font-semibold hover:opacity-90 transition-opacity text-sm">
         Continue Shopping
       </button>
