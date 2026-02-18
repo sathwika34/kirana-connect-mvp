@@ -21,10 +21,10 @@ const CustomerLayout = () => {
     if (!showNotifs) markCustomerNotifsRead();
   };
 
-  const showBack = location.pathname !== '/customer/stores';
+  const showBack = location.pathname !== '/customer/home';
 
   const navItems = [
-    { path: '/customer/stores', label: 'Home', icon: Home },
+    { path: '/customer/home', label: 'Home', icon: Home },
     { path: '/customer/stores', label: 'Stores', icon: Store },
     { path: '/customer/cart', label: 'Cart', icon: ShoppingCart, badge: cartCount },
     { path: '/customer/orders', label: 'Orders', icon: Package },

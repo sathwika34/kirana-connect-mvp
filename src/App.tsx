@@ -13,6 +13,7 @@ import OwnerProducts from "./pages/owner/OwnerProducts";
 import OwnerOrders from "./pages/owner/OwnerOrders";
 import OwnerProfile from "./pages/owner/OwnerProfile";
 import CustomerLogin from "./pages/customer/CustomerLogin";
+import CustomerHome from "./pages/customer/CustomerHome";
 import CustomerAddress from "./pages/customer/CustomerAddress";
 import StoreSelection from "./pages/customer/StoreSelection";
 import CustomerProducts from "./pages/customer/CustomerProducts";
@@ -56,6 +57,7 @@ const App = () => (
           {/* Customer Flow */}
           <Route path="/customer/login" element={<CustomerLogin />} />
           <Route path="/customer" element={<CustomerLayout />}>
+            <Route path="home" element={<CustomerHome />} />
             <Route path="address" element={<CustomerAddress />} />
             <Route path="stores" element={<StoreSelection />} />
             <Route path="products" element={<CustomerProducts />} />
