@@ -29,9 +29,11 @@ import NotFound from "./pages/NotFound";
 import AdminLogin from "./pages/admin/AdminLogin";
 import AdminDashboard from "./pages/admin/AdminDashboard";
 import AdminStores from "./pages/admin/AdminStores";
-import AdminUsers from "./pages/admin/AdminUsers";
+import AdminCustomers from "./pages/admin/AdminCustomers";
+import AdminOwners from "./pages/admin/AdminOwners";
 import AdminOrders from "./pages/admin/AdminOrders";
 import AdminReports from "./pages/admin/AdminReports";
+import AdminSettings from "./pages/admin/AdminSettings";
 
 // Layouts
 import OwnerLayout from "./components/OwnerLayout";
@@ -83,9 +85,11 @@ const App = () => (
           <Route path="/admin" element={<AdminLayout />}>
             <Route path="dashboard" element={<AdminDashboard />} />
             <Route path="stores" element={<AdminStores />} />
-            <Route path="users" element={<AdminUsers />} />
+            <Route path="customers" element={<AdminCustomers />} />
+            <Route path="owners" element={<AdminOwners />} />
             <Route path="orders" element={<AdminOrders />} />
             <Route path="reports" element={<AdminReports />} />
+            <Route path="settings" element={<AdminSettings />} />
           </Route>
 
           <Route path="*" element={<NotFound />} />

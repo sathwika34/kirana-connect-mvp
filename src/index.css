@@ -159,3 +159,33 @@
     @apply bg-clip-text text-transparent bg-gradient-to-r from-primary to-emerald-500;
   }
 }
+
+/* ===== Admin Panel Theme ===== */
+.admin-theme {
+  --admin-primary: 239 84% 67%;
+  --admin-primary-dark: 239 84% 57%;
+  --admin-sidebar-bg: 224 71% 10%;
+  --admin-sidebar-fg: 220 20% 75%;
+  --admin-sidebar-active: 239 84% 67%;
+  --admin-sidebar-hover: 224 50% 16%;
+  --admin-topbar-bg: 0 0% 100%;
+  --admin-accent: 239 84% 67%;
+}
+
+@layer components {
+  .admin-card {
+    @apply bg-white shadow-md rounded-xl border border-gray-100 transition-all duration-200;
+  }
+  .admin-card:hover {
+    @apply shadow-lg scale-[1.02];
+  }
+  .admin-badge-active {
+    @apply px-2.5 py-1 rounded-full text-xs font-semibold bg-green-100 text-green-800;
+  }
+  .admin-badge-pending {
+    @apply px-2.5 py-1 rounded-full text-xs font-semibold bg-yellow-100 text-yellow-800;
+  }
+  .admin-badge-suspended {
+    @apply px-2.5 py-1 rounded-full text-xs font-semibold bg-red-100 text-red-800;
+  }
+}
