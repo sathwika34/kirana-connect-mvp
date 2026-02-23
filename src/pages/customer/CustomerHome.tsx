@@ -1,26 +1,27 @@
 /**
- * Customer Home Page — Premium glassmorphism quick-commerce style
- * Sections: Location+Search, Quick Actions, Active Order, Favourite Shops,
- * Daily Essentials, Upload List, WhatsApp Order, Popular Near You, USP Banner
+ * Customer Home Page — Premium grocery quick-commerce with hero banner
  */
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import {
-  MapPin, Search, ShoppingBag, Wallet, Tag, Users, HelpCircle, RefreshCw,
+  MapPin, Search, ShoppingBag, Tag, HelpCircle,
   Clock, Package, Store, Heart, Plus, Camera, Mic, MessageCircle,
-  Rocket, Leaf, Shield, ChevronRight, Truck, ListChecks, Upload
+  Rocket, Leaf, Shield, ChevronRight, Truck, ListChecks, Upload, ChevronDown
 } from 'lucide-react';
-import { getShop, getProducts, getOrders, getCustomerProfile, getCart, saveCart, type CartItem, type Product } from '@/lib/store';
+import { getShop, getProducts, getOrders, getCart, saveCart, type Product } from '@/lib/store';
 import { toast } from 'sonner';
+import heroImage from '@/assets/hero-grocery.jpg';
 
 /* ── animation variants ── */
 const fadeUp = {
-  hidden: { opacity: 0, y: 24 },
-  visible: { opacity: 1, y: 0, transition: { duration: 0.5, ease: 'easeOut' as const } },
+  hidden: { opacity: 0, y: 30 },
+  visible: { opacity: 1, y: 0, transition: { duration: 0.6, ease: 'easeOut' as const } },
 };
-const stagger = {
-  visible: { transition: { staggerChildren: 0.07 } },
+const stagger = { visible: { transition: { staggerChildren: 0.08 } } };
+const scaleIn = {
+  hidden: { opacity: 0, scale: 0.9 },
+  visible: { opacity: 1, scale: 1, transition: { duration: 0.5 } },
 };
 
 /* ── helpers ── */
@@ -49,6 +50,7 @@ const CustomerHome = () => {
   const [favourites, setFavourites] = useState<string[]>(() => {
     try { return JSON.parse(localStorage.getItem('kc_fav_shops') || '[]'); } catch { return []; }
   });
+  const contentRef = useRef<HTMLDivElement>(null);
 
   const toggleFav = (name: string) => {
     setFavourites(prev => {
@@ -67,16 +69,20 @@ const CustomerHome = () => {
     toast.success(`${product.name} added to cart`);
   };
 
+  const scrollToContent = () => {
+    contentRef.current?.scrollIntoView({ behavior: 'smooth' });
+  };
+
   const essentials = availableProducts.slice(0, 6);
   const popular = availableProducts.slice(-6);
 
   const quickActions = [
-    { icon: ListChecks, label: 'Track Order', path: '/customer/orders', color: 'from-primary/20 to-primary/10' },
-    { icon: Upload, label: 'Upload List', path: '#', color: 'from-secondary/20 to-secondary/10' },
-    { icon: MessageCircle, label: 'WhatsApp Order', path: '#', color: 'from-accent/60 to-accent/30' },
-    { icon: Heart, label: 'Favourites', path: '#', color: 'from-destructive/20 to-destructive/10' },
-    { icon: Tag, label: 'Offers', path: '#', color: 'from-primary/15 to-secondary/10' },
-    { icon: HelpCircle, label: 'Help', path: '#', color: 'from-muted/60 to-muted/30' },
+    { icon: ListChecks, label: 'Track Order', path: '/customer/orders' },
+    { icon: Upload, label: 'Upload List', path: '#' },
+    { icon: MessageCircle, label: 'WhatsApp Order', path: '#' },
+    { icon: Heart, label: 'Favourites', path: '#' },
+    { icon: Tag, label: 'Offers', path: '#' },
+    { icon: HelpCircle, label: 'Help', path: '#' },
   ];
 
   const statusSteps = ['New', 'Accepted', 'Preparing', 'Out for Delivery', 'Delivered'];
@@ -84,22 +90,64 @@ const CustomerHome = () => {
     ? ((statusSteps.indexOf(activeOrder.status) + 1) / statusSteps.length) * 100
     : 0;
 
-  // Glass card base class
-  const glass = 'bg-white/60 backdrop-blur-xl border border-white/40 shadow-lg';
-
   return (
-    <div className="max-w-7xl mx-auto space-y-8 pb-12">
+    <div className="min-h-screen bg-background">
 
-      {/* ═══ 1. LOCATION + SEARCH ═══ */}
-      <motion.section variants={fadeUp} initial="hidden" animate="visible"
-        className="sticky top-[57px] z-10 -mx-4 md:-mx-6 px-4 md:px-6 pt-4 pb-4 bg-gradient-to-b from-background via-background/95 to-background/80 backdrop-blur-sm">
-        <div className="max-w-7xl mx-auto">
+      {/* ═══ HERO BANNER ═══ */}
+      <section className="relative w-full h-[70vh] min-h-[420px] max-h-[600px] overflow-hidden -mt-[57px]">
+        <div className="absolute inset-0">
+          <img src={heroImage} alt="Fresh groceries" className="w-full h-full object-cover" />
+          <div className="absolute inset-0 bg-gradient-to-b from-black/70 via-black/50 to-black/80" />
+        </div>
+        <motion.div
+          initial={{ opacity: 0, y: 40 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.8, ease: 'easeOut' }}
+          className="relative z-10 flex flex-col items-center justify-center h-full text-center px-4"
+        >
+          <motion.div
+            initial={{ scale: 0 }}
+            animate={{ scale: 1 }}
+            transition={{ delay: 0.2, type: 'spring', stiffness: 200 }}
+            className="w-16 h-16 rounded-2xl bg-primary/20 backdrop-blur-md border border-white/20 flex items-center justify-center mb-6"
+          >
+            <ShoppingBag className="w-8 h-8 text-primary-foreground" />
+          </motion.div>
+          <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-white mb-3">
+            Welcome to <span className="text-primary">KiranaConnect</span>
+          </h1>
+          <p className="text-white/80 text-base md:text-lg max-w-xl mb-8">
+            Explore fresh groceries from trusted local stores
+          </p>
+          <motion.button
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+            onClick={scrollToContent}
+            className="px-8 py-3.5 rounded-full bg-primary text-primary-foreground font-semibold text-base shadow-lg hover:shadow-xl transition-all duration-300"
+          >
+            Browse Stores
+          </motion.button>
+          <motion.div
+            animate={{ y: [0, 8, 0] }}
+            transition={{ repeat: Infinity, duration: 2 }}
+            className="mt-8"
+          >
+            <ChevronDown className="w-6 h-6 text-white/50" />
+          </motion.div>
+        </motion.div>
+      </section>
+
+      {/* ═══ MAIN CONTENT ═══ */}
+      <div ref={contentRef} className="max-w-7xl mx-auto px-4 md:px-6 space-y-8 py-8">
+
+        {/* ═══ 1. LOCATION + SEARCH ═══ */}
+        <motion.section variants={fadeUp} initial="hidden" whileInView="visible" viewport={{ once: true }}>
           <div className="flex items-center gap-2 mb-3">
-            <div className="w-8 h-8 rounded-full bg-gradient-to-br from-primary/20 to-primary/5 flex items-center justify-center">
+            <div className="w-8 h-8 rounded-full bg-primary/15 flex items-center justify-center">
               <MapPin className="w-4 h-4 text-primary" />
             </div>
             <div className="flex-1">
-              <p className="text-xs font-semibold text-foreground leading-tight">Delivering to</p>
+              <p className="text-xs font-semibold text-foreground">Delivering to</p>
               <p className="text-[11px] text-muted-foreground">Hyderabad, Banjara Hills</p>
             </div>
             <ChevronRight className="w-4 h-4 text-muted-foreground" />
@@ -111,239 +159,239 @@ const CustomerHome = () => {
               placeholder="Search for atta, dal, snacks..."
               value={searchQuery}
               onChange={e => setSearchQuery(e.target.value)}
-              className={`w-full pl-11 pr-4 py-3 rounded-2xl ${glass} text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/30 transition-all duration-300`}
+              className="w-full pl-11 pr-4 py-3 rounded-2xl bg-card border border-border shadow-sm text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/30 focus:scale-[1.01] transition-all duration-300"
             />
           </div>
-        </div>
-      </motion.section>
-
-      {/* ═══ 2. QUICK ACTIONS ═══ */}
-      <motion.section variants={stagger} initial="hidden" animate="visible">
-        <div className="grid grid-cols-3 md:grid-cols-6 gap-3">
-          {quickActions.map((a, i) => (
-            <motion.button
-              key={i}
-              variants={fadeUp}
-              whileHover={{ scale: 1.05, y: -2 }}
-              whileTap={{ scale: 0.95 }}
-              onClick={() => a.path !== '#' && navigate(a.path)}
-              className={`flex flex-col items-center gap-2 p-4 rounded-2xl ${glass} hover:shadow-xl transition-all duration-300 group`}
-            >
-              <div className={`w-10 h-10 rounded-xl bg-gradient-to-br ${a.color} flex items-center justify-center group-hover:scale-110 transition-transform duration-300`}>
-                <a.icon className="w-5 h-5 text-foreground/70" />
-              </div>
-              <span className="text-[11px] font-medium text-foreground/80 whitespace-nowrap">{a.label}</span>
-            </motion.button>
-          ))}
-        </div>
-      </motion.section>
-
-      {/* ═══ 3. ACTIVE ORDER TRACKING ═══ */}
-      {activeOrder && (
-        <motion.section variants={fadeUp} initial="hidden" animate="visible">
-          <motion.div
-            whileHover={{ scale: 1.01 }}
-            className={`rounded-2xl ${glass} p-5 cursor-pointer`}
-            onClick={() => navigate(`/customer/order/${activeOrder.id}`)}
-          >
-            <div className="flex items-center justify-between mb-3">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-primary/20 to-primary/5 flex items-center justify-center">
-                  <Truck className="w-5 h-5 text-primary" />
-                </div>
-                <div>
-                  <span className="text-sm font-bold text-foreground">Your order is on the way!</span>
-                  <p className="text-xs text-muted-foreground">{activeOrder.status}</p>
-                </div>
-              </div>
-              <span className="text-xs text-primary font-semibold">Track →</span>
-            </div>
-            <div className="w-full h-2 rounded-full bg-muted/50 overflow-hidden">
-              <motion.div
-                className="h-full rounded-full bg-gradient-to-r from-primary to-primary/70"
-                initial={{ width: 0 }}
-                animate={{ width: `${activeProgress}%` }}
-                transition={{ duration: 1.2, ease: 'easeOut' }}
-              />
-            </div>
-            <p className="text-[11px] text-muted-foreground mt-2">Order #{activeOrder.id.slice(0, 6)}</p>
-          </motion.div>
         </motion.section>
-      )}
 
-      {/* ═══ 4. FAVOURITE SHOPS ═══ */}
-      <motion.section variants={fadeUp} initial="hidden" animate="visible">
-        <h2 className="text-lg font-bold text-foreground mb-3">Favourite Shops</h2>
-        {stores.length === 0 ? (
-          <p className="text-sm text-muted-foreground">No stores available yet.</p>
-        ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-            {stores.map((s, i) => {
-              const storeOpen = isOpen(s.openingTime, s.closingTime);
-              const isFav = favourites.includes(s.shopName);
-              return (
+        {/* ═══ 2. QUICK ACTIONS ═══ */}
+        <motion.section variants={stagger} initial="hidden" whileInView="visible" viewport={{ once: true }}>
+          <div className="grid grid-cols-3 md:grid-cols-6 gap-3">
+            {quickActions.map((a, i) => (
+              <motion.button
+                key={i}
+                variants={fadeUp}
+                whileHover={{ scale: 1.06, y: -3 }}
+                whileTap={{ scale: 0.94 }}
+                onClick={() => a.path !== '#' && navigate(a.path)}
+                className="flex flex-col items-center gap-2 p-4 rounded-2xl bg-card border border-border shadow-sm hover:shadow-lg transition-all duration-300"
+              >
+                <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
+                  <a.icon className="w-5 h-5 text-primary" />
+                </div>
+                <span className="text-[11px] font-medium text-foreground/80 whitespace-nowrap">{a.label}</span>
+              </motion.button>
+            ))}
+          </div>
+        </motion.section>
+
+        {/* ═══ 3. ACTIVE ORDER ═══ */}
+        {activeOrder && (
+          <motion.section variants={fadeUp} initial="hidden" whileInView="visible" viewport={{ once: true }}>
+            <motion.div
+              whileHover={{ scale: 1.01 }}
+              className="rounded-2xl bg-card border border-border shadow-sm p-5 cursor-pointer hover:shadow-lg transition-all duration-300"
+              onClick={() => navigate(`/customer/order/${activeOrder.id}`)}
+            >
+              <div className="flex items-center justify-between mb-3">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-xl bg-primary/15 flex items-center justify-center">
+                    <Truck className="w-5 h-5 text-primary" />
+                  </div>
+                  <div>
+                    <span className="text-sm font-bold text-foreground">Your order is on the way!</span>
+                    <p className="text-xs text-muted-foreground">{activeOrder.status}</p>
+                  </div>
+                </div>
+                <span className="text-xs text-primary font-semibold">Track →</span>
+              </div>
+              <div className="w-full h-2.5 rounded-full bg-muted overflow-hidden">
                 <motion.div
-                  key={i}
+                  className="h-full rounded-full bg-primary"
+                  initial={{ width: 0 }}
+                  animate={{ width: `${activeProgress}%` }}
+                  transition={{ duration: 1.2, ease: 'easeOut' }}
+                />
+              </div>
+              <p className="text-[11px] text-muted-foreground mt-2">Order #{activeOrder.id.slice(0, 6)}</p>
+            </motion.div>
+          </motion.section>
+        )}
+
+        {/* ═══ 4. FAVOURITE SHOPS ═══ */}
+        <motion.section variants={fadeUp} initial="hidden" whileInView="visible" viewport={{ once: true }}>
+          <h2 className="text-lg font-bold text-foreground mb-3">Favourite Shops</h2>
+          {stores.length === 0 ? (
+            <p className="text-sm text-muted-foreground">No stores available yet.</p>
+          ) : (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+              {stores.map((s, i) => {
+                const storeOpen = isOpen(s.openingTime, s.closingTime);
+                const isFav = favourites.includes(s.shopName);
+                return (
+                  <motion.div
+                    key={i}
+                    variants={scaleIn}
+                    whileHover={{ y: -4 }}
+                    className="relative rounded-2xl bg-card border border-border shadow-sm p-4 cursor-pointer hover:shadow-lg transition-all duration-300"
+                    onClick={() => navigate('/customer/products')}
+                  >
+                    <div className="w-full h-28 rounded-xl bg-gradient-to-br from-primary/10 to-muted flex items-center justify-center mb-3">
+                      <Store className="w-10 h-10 text-primary/30" />
+                    </div>
+                    <h3 className="text-sm font-bold text-foreground truncate">{s.shopName}</h3>
+                    <div className="flex items-center gap-3 mt-1 text-[11px] text-muted-foreground">
+                      <span className="flex items-center gap-1"><MapPin className="w-3 h-3" />{s.address.area}</span>
+                      <span className="flex items-center gap-1"><Clock className="w-3 h-3" />{formatTime(s.openingTime)} – {formatTime(s.closingTime)}</span>
+                    </div>
+                    <span className={`mt-2 inline-block px-2.5 py-0.5 rounded-full text-[10px] font-semibold ${storeOpen ? 'bg-primary/10 text-primary' : 'bg-destructive/10 text-destructive'}`}>
+                      {storeOpen ? 'Open' : 'Closed'}
+                    </span>
+                    <motion.button
+                      whileTap={{ scale: 1.4 }}
+                      onClick={e => { e.stopPropagation(); toggleFav(s.shopName); }}
+                      className="absolute top-4 right-4"
+                    >
+                      <Heart className={`w-5 h-5 transition-colors duration-200 ${isFav ? 'fill-destructive text-destructive' : 'text-muted-foreground/40'}`} />
+                    </motion.button>
+                  </motion.div>
+                );
+              })}
+            </div>
+          )}
+        </motion.section>
+
+        {/* ═══ 5. DAILY ESSENTIALS ═══ */}
+        <motion.section variants={stagger} initial="hidden" whileInView="visible" viewport={{ once: true }}>
+          <h2 className="text-lg font-bold text-foreground mb-3">Daily Essentials</h2>
+          {essentials.length === 0 ? (
+            <div className="text-center py-10 text-muted-foreground text-sm bg-card rounded-2xl border border-border shadow-sm">
+              <Package className="w-10 h-10 mx-auto mb-2 text-muted-foreground/30" />
+              No products available.
+            </div>
+          ) : (
+            <div className="flex gap-4 overflow-x-auto pb-2 scrollbar-none">
+              {essentials.map(p => (
+                <motion.div
+                  key={p.id}
                   variants={fadeUp}
                   whileHover={{ y: -4 }}
-                  className={`relative rounded-2xl ${glass} p-4 cursor-pointer hover:shadow-xl transition-all duration-300`}
-                  onClick={() => navigate('/customer/products')}
+                  className="min-w-[160px] md:min-w-[180px] rounded-2xl bg-card border border-border shadow-sm p-3 flex flex-col hover:shadow-lg transition-all duration-300"
                 >
-                  <div className="w-full h-28 rounded-xl bg-gradient-to-br from-accent to-muted/30 flex items-center justify-center mb-3">
-                    <Store className="w-10 h-10 text-primary/30" />
+                  <div className="w-full aspect-square rounded-xl bg-gradient-to-br from-primary/5 to-muted flex items-center justify-center mb-2">
+                    <Package className="w-8 h-8 text-primary/25" />
                   </div>
-                  <h3 className="text-sm font-bold text-foreground truncate">{s.shopName}</h3>
-                  <div className="flex items-center gap-3 mt-1 text-[11px] text-muted-foreground">
-                    <span className="flex items-center gap-1"><MapPin className="w-3 h-3" />{s.address.area}</span>
-                    <span className="flex items-center gap-1"><Clock className="w-3 h-3" />{formatTime(s.openingTime)} – {formatTime(s.closingTime)}</span>
+                  <h3 className="text-xs font-medium text-foreground flex-1 mb-1 line-clamp-2">{p.name}</h3>
+                  <div className="flex items-center justify-between mt-auto">
+                    <span className="font-bold text-foreground text-sm">₹{p.price}</span>
+                    <motion.button
+                      whileTap={{ scale: 0.75 }}
+                      onClick={() => addToCart(p)}
+                      className="w-8 h-8 rounded-full bg-primary text-primary-foreground flex items-center justify-center shadow-md hover:shadow-lg transition-all duration-200"
+                    >
+                      <Plus className="w-4 h-4" />
+                    </motion.button>
                   </div>
-                  <span className={`mt-2 inline-block px-2.5 py-0.5 rounded-full text-[10px] font-semibold ${storeOpen ? 'bg-primary/10 text-primary' : 'bg-destructive/10 text-destructive'}`}>
-                    {storeOpen ? 'Open' : 'Closed'}
-                  </span>
-                  <motion.button
-                    whileTap={{ scale: 1.4 }}
-                    onClick={e => { e.stopPropagation(); toggleFav(s.shopName); }}
-                    className="absolute top-4 right-4"
-                  >
-                    <Heart className={`w-5 h-5 transition-colors duration-200 ${isFav ? 'fill-destructive text-destructive' : 'text-muted-foreground/40'}`} />
-                  </motion.button>
                 </motion.div>
-              );
-            })}
-          </div>
-        )}
-      </motion.section>
+              ))}
+            </div>
+          )}
+        </motion.section>
 
-      {/* ═══ 5. DAILY ESSENTIALS ═══ */}
-      <motion.section variants={stagger} initial="hidden" animate="visible">
-        <h2 className="text-lg font-bold text-foreground mb-3">Daily Essentials</h2>
-        {essentials.length === 0 ? (
-          <div className={`text-center py-10 text-muted-foreground text-sm ${glass} rounded-2xl`}>
-            <Package className="w-10 h-10 mx-auto mb-2 text-muted-foreground/30" />
-            No products available.
+        {/* ═══ 6. UPLOAD LIST ═══ */}
+        <motion.section variants={fadeUp} initial="hidden" whileInView="visible" viewport={{ once: true }}>
+          <div className="rounded-2xl bg-gradient-to-br from-primary/10 via-card to-secondary/10 border border-border shadow-sm p-6 text-center">
+            <div className="flex justify-center gap-5 mb-3">
+              <motion.div animate={{ scale: [1, 1.1, 1] }} transition={{ repeat: Infinity, duration: 3 }}
+                className="w-12 h-12 rounded-xl bg-secondary/15 flex items-center justify-center">
+                <Camera className="w-6 h-6 text-secondary" />
+              </motion.div>
+              <motion.div animate={{ scale: [1, 1.1, 1] }} transition={{ repeat: Infinity, duration: 3, delay: 0.5 }}
+                className="w-12 h-12 rounded-xl bg-primary/15 flex items-center justify-center">
+                <Mic className="w-6 h-6 text-primary" />
+              </motion.div>
+            </div>
+            <h3 className="font-bold text-foreground mb-1">Upload your list 📝</h3>
+            <p className="text-xs text-muted-foreground mb-4">Take a photo or speak your items — we'll find them!</p>
+            <motion.button
+              whileHover={{ scale: 1.03 }}
+              whileTap={{ scale: 0.97 }}
+              className="px-6 py-2.5 rounded-full bg-primary text-primary-foreground text-sm font-semibold shadow-md hover:shadow-lg transition-all duration-200"
+            >
+              Upload Now
+            </motion.button>
           </div>
-        ) : (
+        </motion.section>
+
+        {/* ═══ 7. WHATSAPP ORDER ═══ */}
+        <motion.section variants={fadeUp} initial="hidden" whileInView="visible" viewport={{ once: true }}>
+          <div className="rounded-2xl bg-card border border-border shadow-sm p-5 flex items-center gap-4">
+            <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
+              <MessageCircle className="w-6 h-6 text-primary" />
+            </div>
+            <div className="flex-1">
+              <h3 className="font-bold text-foreground text-sm">Order via WhatsApp</h3>
+              <p className="text-xs text-muted-foreground mt-0.5">Send your list — super fast & easy!</p>
+            </div>
+            <motion.button
+              whileHover={{ scale: 1.05, y: -1 }}
+              whileTap={{ scale: 0.95 }}
+              className="px-5 py-2.5 rounded-full bg-primary text-primary-foreground text-xs font-bold shadow-md hover:shadow-lg whitespace-nowrap transition-all duration-200"
+            >
+              Chat Now
+            </motion.button>
+          </div>
+        </motion.section>
+
+        {/* ═══ 8. POPULAR NEAR YOU ═══ */}
+        <motion.section variants={stagger} initial="hidden" whileInView="visible" viewport={{ once: true }}>
+          <h2 className="text-lg font-bold text-foreground mb-3">Popular Near You</h2>
           <div className="flex gap-4 overflow-x-auto pb-2 scrollbar-none">
-            {essentials.map(p => (
+            {popular.map(p => (
               <motion.div
                 key={p.id}
                 variants={fadeUp}
                 whileHover={{ y: -4 }}
-                className={`min-w-[160px] md:min-w-[180px] rounded-2xl ${glass} p-3 flex flex-col hover:shadow-xl transition-all duration-300`}
+                className="min-w-[155px] rounded-2xl bg-card border border-border shadow-sm p-3 cursor-pointer hover:shadow-lg transition-all duration-300"
+                onClick={() => navigate('/customer/products')}
               >
-                <div className="w-full aspect-square rounded-xl bg-gradient-to-br from-accent to-muted/20 flex items-center justify-center mb-2">
-                  <Package className="w-8 h-8 text-primary/25" />
+                <div className="w-full aspect-square rounded-xl bg-gradient-to-br from-primary/5 to-muted flex items-center justify-center mb-2 relative">
+                  <Package className="w-7 h-7 text-primary/25" />
+                  <span className="absolute top-1.5 left-1.5 px-2 py-0.5 rounded-full bg-primary text-primary-foreground text-[9px] font-bold shadow-sm">Popular</span>
                 </div>
-                <h3 className="text-xs font-medium text-foreground flex-1 mb-1 line-clamp-2">{p.name}</h3>
-                <div className="flex items-center justify-between mt-auto">
-                  <span className="font-bold text-foreground text-sm">₹{p.price}</span>
-                  <motion.button
-                    whileTap={{ scale: 0.75 }}
-                    onClick={() => addToCart(p)}
-                    className="w-8 h-8 rounded-full bg-primary text-primary-foreground flex items-center justify-center shadow-md hover:shadow-lg hover:bg-primary/90 transition-all duration-200"
-                  >
-                    <Plus className="w-4 h-4" />
-                  </motion.button>
-                </div>
+                <h3 className="text-xs font-medium text-foreground line-clamp-2 mb-1">{p.name}</h3>
+                <span className="font-bold text-foreground text-sm">₹{p.price}</span>
               </motion.div>
             ))}
           </div>
-        )}
-      </motion.section>
+        </motion.section>
 
-      {/* ═══ 6. UPLOAD LIST ═══ */}
-      <motion.section variants={fadeUp} initial="hidden" animate="visible">
-        <div className={`rounded-2xl ${glass} p-6 text-center`}>
-          <div className="flex justify-center gap-5 mb-3">
-            <motion.div animate={{ scale: [1, 1.08, 1] }} transition={{ repeat: Infinity, duration: 3 }}
-              className="w-12 h-12 rounded-xl bg-gradient-to-br from-secondary/15 to-secondary/5 flex items-center justify-center">
-              <Camera className="w-6 h-6 text-secondary/70" />
-            </motion.div>
-            <motion.div animate={{ scale: [1, 1.08, 1] }} transition={{ repeat: Infinity, duration: 3, delay: 0.5 }}
-              className="w-12 h-12 rounded-xl bg-gradient-to-br from-primary/15 to-primary/5 flex items-center justify-center">
-              <Mic className="w-6 h-6 text-primary/70" />
-            </motion.div>
+        {/* ═══ 9. USP BANNER ═══ */}
+        <motion.section variants={fadeUp} initial="hidden" whileInView="visible" viewport={{ once: true }}>
+          <div className="rounded-2xl bg-gradient-to-r from-primary/10 via-card to-secondary/10 border border-border shadow-sm p-6">
+            <div className="flex items-center justify-center gap-8 md:gap-14 flex-wrap">
+              {[
+                { icon: Rocket, text: 'Fast Delivery' },
+                { icon: Leaf, text: 'Fresh Products' },
+                { icon: Shield, text: 'Trusted Stores' },
+              ].map((item, i) => (
+                <motion.div
+                  key={i}
+                  animate={{ y: [0, -4, 0] }}
+                  transition={{ repeat: Infinity, duration: 3, delay: i * 0.4 }}
+                  className="flex flex-col items-center gap-2"
+                >
+                  <div className="w-12 h-12 rounded-xl bg-primary/15 flex items-center justify-center">
+                    <item.icon className="w-6 h-6 text-primary" />
+                  </div>
+                  <span className="text-xs font-semibold text-foreground/70">{item.text}</span>
+                </motion.div>
+              ))}
+            </div>
           </div>
-          <h3 className="font-bold text-foreground mb-1">Upload your list 📝</h3>
-          <p className="text-xs text-muted-foreground mb-4">Take a photo or speak your items — we'll find them!</p>
-          <motion.button
-            whileHover={{ scale: 1.03 }}
-            whileTap={{ scale: 0.97 }}
-            className="px-6 py-2.5 rounded-full bg-primary text-primary-foreground text-sm font-semibold shadow-md hover:shadow-lg transition-all duration-200"
-          >
-            Upload Now
-          </motion.button>
-        </div>
-      </motion.section>
+        </motion.section>
 
-      {/* ═══ 7. WHATSAPP ORDER ═══ */}
-      <motion.section variants={fadeUp} initial="hidden" animate="visible">
-        <div className={`rounded-2xl ${glass} p-5 flex items-center gap-4`}>
-          <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
-            <MessageCircle className="w-6 h-6 text-primary" />
-          </div>
-          <div className="flex-1">
-            <h3 className="font-bold text-foreground text-sm">Order via WhatsApp</h3>
-            <p className="text-xs text-muted-foreground mt-0.5">Send your list — super fast & easy!</p>
-          </div>
-          <motion.button
-            whileHover={{ scale: 1.05, y: -1 }}
-            whileTap={{ scale: 0.95 }}
-            className="px-5 py-2.5 rounded-full bg-primary text-primary-foreground text-xs font-bold shadow-md hover:shadow-lg whitespace-nowrap transition-all duration-200"
-          >
-            Chat Now
-          </motion.button>
-        </div>
-      </motion.section>
-
-      {/* ═══ 8. POPULAR NEAR YOU ═══ */}
-      <motion.section variants={stagger} initial="hidden" animate="visible">
-        <h2 className="text-lg font-bold text-foreground mb-3">Popular Near You</h2>
-        <div className="flex gap-4 overflow-x-auto pb-2 scrollbar-none">
-          {popular.map(p => (
-            <motion.div
-              key={p.id}
-              variants={fadeUp}
-              whileHover={{ y: -4 }}
-              className={`min-w-[155px] rounded-2xl ${glass} p-3 cursor-pointer hover:shadow-xl transition-all duration-300`}
-              onClick={() => navigate('/customer/products')}
-            >
-              <div className="w-full aspect-square rounded-xl bg-gradient-to-br from-accent to-muted/20 flex items-center justify-center mb-2 relative">
-                <Package className="w-7 h-7 text-primary/25" />
-                <span className="absolute top-1.5 left-1.5 px-2 py-0.5 rounded-full bg-primary/90 text-primary-foreground text-[9px] font-bold shadow-sm">Popular</span>
-              </div>
-              <h3 className="text-xs font-medium text-foreground line-clamp-2 mb-1">{p.name}</h3>
-              <span className="font-bold text-foreground text-sm">₹{p.price}</span>
-            </motion.div>
-          ))}
-        </div>
-      </motion.section>
-
-      {/* ═══ 9. USP BANNER ═══ */}
-      <motion.section variants={fadeUp} initial="hidden" animate="visible">
-        <div className={`rounded-2xl ${glass} p-6`}>
-          <div className="flex items-center justify-center gap-8 md:gap-14 flex-wrap">
-            {[
-              { icon: Rocket, text: 'Fast Delivery', gradient: 'from-primary/15 to-primary/5' },
-              { icon: Leaf, text: 'Fresh Products', gradient: 'from-secondary/15 to-secondary/5' },
-              { icon: Shield, text: 'Trusted Stores', gradient: 'from-accent/40 to-accent/20' },
-            ].map((item, i) => (
-              <motion.div
-                key={i}
-                animate={{ y: [0, -3, 0] }}
-                transition={{ repeat: Infinity, duration: 3, delay: i * 0.4 }}
-                className="flex flex-col items-center gap-2"
-              >
-                <div className={`w-12 h-12 rounded-xl bg-gradient-to-br ${item.gradient} flex items-center justify-center`}>
-                  <item.icon className="w-6 h-6 text-foreground/50" />
-                </div>
-                <span className="text-xs font-semibold text-foreground/70">{item.text}</span>
-              </motion.div>
-            ))}
-          </div>
-        </div>
-      </motion.section>
-
+      </div>
     </div>
   );
 };
